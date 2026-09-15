@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenTranscript 设置</title>
+    <style>
+      body { font: 15px system-ui, sans-serif; margin: 2rem auto; max-width: 42rem; color: #1f2937; }
+      label, input, button { display: block; }
+      input { box-sizing: border-box; margin: .5rem 0 1rem; padding: .6rem; width: 100%; }
+      button { display: inline-block; margin-right: .5rem; padding: .55rem .8rem; }
+      #status { min-height: 1.5rem; margin-top: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>OpenTranscript</h1>
+    <label for="server-url">Rust 服务地址</label>
+    <input id="server-url" type="url" value="http://127.0.0.1:4242" required>
+    <button id="save">保存</button>
+    <button id="test">测试连接</button>
+    <p id="status" role="status"></p>
+    <script src="options.js"></script>
+  </body>
+</html>

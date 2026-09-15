@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Rust tests
+        run: cargo test
+      - name: Rust lint
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Extension tests
+        run: node --test extension/bilibili-utils.test.js
+      - name: Build release assets
+        run: |
+          ./scripts/package-extension.sh
+          ./scripts/package-macos-backend.sh

@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible OpenTranscript problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Remove API keys, cookies, private transcripts, and local personal paths before posting.
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      options: [YouTube, Bilibili, Local service, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: Include the page type, action, observed result, and expected result.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: OpenTranscript and browser versions
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Redacted error output

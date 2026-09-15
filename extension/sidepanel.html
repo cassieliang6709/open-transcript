@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenTranscript</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body>
+    <main class="studio">
+      <header class="studio-header">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">OpenTranscript</p>
+            <h1>转录工作台</h1>
+          </div>
+          <button class="text-button" id="reload" type="button">重新读取</button>
+        </div>
+
+        <div class="video-meta" id="video-meta">
+          <img id="thumbnail" alt="" width="72" height="42">
+          <div class="video-copy">
+            <h2 id="video-title">正在读取视频…</h2>
+            <p><span id="channel">视频</span><span aria-hidden="true"> · </span><span id="duration">--:--</span></p>
+          </div>
+          <span class="language" id="language">--</span>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="工作区">
+        <button class="tab is-active" data-tab="captions" type="button">字幕</button>
+        <button class="tab" data-tab="note" type="button">笔记</button>
+        <button class="tab" data-tab="interview" type="button">访谈</button>
+      </nav>
+
+      <section class="view captions-view is-active" id="captions-view">
+        <div class="playback-row">
+          <input id="progress" type="range" min="0" max="1000" value="0" aria-label="视频进度">
+          <output id="playback-time">00:00 / --:--</output>
+        </div>
+
+        <div class="utility-row">
+          <label class="search-field">
+            <span>搜索</span>
+            <input id="search" type="search" placeholder="字幕内容" autocomplete="off">
+          </label>
+          <label class="follow-control">
+            <input id="follow-playback" type="checkbox" checked>
+            <span>跟随播放</span>
+          </label>
+        </div>
+
+        <div class="caption-toolbar">
+          <div class="status" id="caption-status" role="status">正在读取完整字幕…</div>
+          <div class="caption-actions">
+            <button class="small-button" id="copy-transcript" type="button" disabled>复制全文</button>
+            <button class="small-button" id="open-interview" type="button" disabled>AI 访谈</button>
+          </div>
+        </div>
+        <div class="transcript" id="transcript" aria-live="polite"></div>
+
+        <div class="selection-toolbar" id="selection-toolbar" hidden>
+          <button type="button" data-selection-action="excerpt">加入摘录</button>
+          <button type="button" data-selection-action="copy">复制</button>
+          <button type="button" data-selection-action="edit">编辑段落</button>
+        </div>
+      </section>
+
+      <section class="view note-view" id="note-view">
+        <div class="note-empty" id="note-empty">
+          <p class="note-kicker">还没有生成笔记</p>
+          <h2>先阅读和整理字幕，再让 AI 动笔。</h2>
+          <p>完整字幕会一直保留；你加入的摘录会作为重点传给模型。</p>
+        </div>
+        <div class="note-loading" id="note-loading" hidden role="status">
+          <span class="loading-indicator" aria-hidden="true"></span>
+          <p class="note-kicker">DeepSeek V4 Flash 正在写作</p>
+          <h2 id="note-loading-title">正在生成沉浸式双语笔记…</h2>
+          <p>你可以切回字幕继续阅读，生成完成后笔记会自动出现。</p>
+        </div>
+        <article class="generated-note" id="generated-note" hidden>
+          <div class="note-status-row">
+            <div class="note-status-copy">
+              <span id="archive-status">已保存到 Obsidian</span>
+              <span id="email-status"></span>
+            </div>
+            <button class="small-button" id="copy-note" type="button" disabled>一键复制笔记</button>
+          </div>
+          <section>
+            <h2>摘要版</h2>
+            <div class="markdown-output" id="summary-output"></div>
+          </section>
+          <section>
+            <h2>完整长文版</h2>
+            <div class="markdown-output article-output" id="article-output"></div>
+          </section>
+          <p class="archive-path" id="archive-path"></p>
+        </article>
+      </section>
+
+      <section class="view interview-view" id="interview-view">
+        <div class="interview-intro" id="interview-intro">
+          <p class="note-kicker">和这支视频对话</p>
+          <h2>从完整字幕里追问观点、例子和细节。</h2>
+          <p>回答只依据当前字幕，并尽量附上可回看的时间戳。</p>
+          <div class="suggested-questions">
+            <button type="button" data-question="请用三点概括这支视频的核心观点。">概括核心观点</button>
+            <button type="button" data-question="这支视频里最值得质疑的观点是什么？为什么？">寻找可质疑点</button>
+          </div>
+        </div>
+        <div class="interview-messages" id="interview-messages" aria-live="polite"></div>
+        <form class="interview-composer" id="interview-form">
+          <textarea id="interview-input" rows="2" maxlength="4000" placeholder="问问这支视频…" required></textarea>
+          <button class="primary-button" id="interview-send" type="submit" disabled>发送</button>
+        </form>
+      </section>
+
+      <footer class="composer" id="note-composer">
+        <div class="excerpt-summary">
+          <span id="excerpt-count">完整字幕</span>
+          <button class="text-button" id="clear-excerpts" type="button" hidden>清除摘录</button>
+        </div>
+        <div class="generate-row">
+          <button class="primary-button" id="generate" type="button" disabled>生成笔记</button>
+          <select id="output-mode" aria-label="笔记语言">
+            <option value="bilingual" selected>中英双语</option>
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="batch-row" id="batch-row" hidden>
+          <button class="small-button batch-button" id="generate-collection" type="button">后台生成整个合集</button>
+          <span id="batch-status"></span>
+        </div>
+        <p class="destination">保存为本地 Markdown 笔记</p>
+        <p class="provider-status" id="provider-status">等待读取 · OpenTranscript</p>
+      </footer>
+    </main>
+    <script src="bilibili-utils.js"></script>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

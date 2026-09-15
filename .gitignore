@@ -1,0 +1,9 @@
+/target/
+/.env
+!/.env.example
+/output/
+/dist/
+/release/
+*.log
+.DS_Store
+/design-qa.md

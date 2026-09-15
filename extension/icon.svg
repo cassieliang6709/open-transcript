@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="OpenTranscript">
+  <rect width="128" height="128" rx="28" fill="#171717"/>
+  <path d="M34 29h60a10 10 0 0 1 10 10v50a10 10 0 0 1-10 10H64L42 113V99h-8a10 10 0 0 1-10-10V39a10 10 0 0 1 10-10Z" fill="#8b7cf6"/>
+  <path d="M43 48h20M43 64h42M43 80h34" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  <path d="m75 44 17 10-17 10Z" fill="#171717"/>
+</svg>

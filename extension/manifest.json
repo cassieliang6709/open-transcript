@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "OpenTranscript",
+  "version": "0.1.0",
+  "description": "Read, excerpt, ask, and turn YouTube or Bilibili transcripts into local notes.",
+  "permissions": ["activeTab", "scripting", "storage", "notifications", "sidePanel", "clipboardWrite"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://bilibili.com/*",
+    "https://www.bilibili.com/*",
+    "https://api.bilibili.com/*",
+    "https://*.hdslb.com/*",
+    "http://127.0.0.1:4242/*",
+    "http://localhost:4242/*"
+  ],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "打开 OpenTranscript"
+  },
+  "options_page": "options.html",
+  "commands": {
+    "archive-current-video": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+    "description": "打开视频字幕工作台"
+    }
+  }
+}
