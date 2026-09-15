@@ -76,6 +76,7 @@ const elements = {
   progress: document.querySelector("#progress"),
   providerStatus: document.querySelector("#provider-status"),
   reload: document.querySelector("#reload"),
+  saveBackground: document.querySelector("#save-background"),
   search: document.querySelector("#search"),
   selectionToolbar: document.querySelector("#selection-toolbar"),
   summaryOutput: document.querySelector("#summary-output"),
@@ -118,6 +119,7 @@ function bindEvents() {
     }
   });
   elements.generateCollection.addEventListener("click", handleCollectionGeneration);
+  elements.saveBackground.addEventListener("click", enqueueCurrentVideo);
   elements.interviewForm.addEventListener("submit", submitInterviewQuestion);
   elements.interviewInput.addEventListener("input", updateInterviewSendState);
   document.querySelectorAll("[data-question]").forEach((button) => {
@@ -166,6 +168,7 @@ async function loadActiveVideo() {
     renderTranscript();
     updateExcerptSummary();
     elements.generate.disabled = false;
+    elements.saveBackground.disabled = false;
     elements.copyTranscript.disabled = false;
     elements.openInterview.disabled = false;
     updateInterviewSendState();
@@ -181,6 +184,7 @@ async function loadActiveVideo() {
     elements.videoTitle.textContent = "无法读取字幕";
     elements.batchRow.hidden = true;
     elements.generate.disabled = true;
+    elements.saveBackground.disabled = true;
     elements.copyTranscript.disabled = true;
     elements.openInterview.disabled = true;
   }
@@ -1041,6 +1045,12 @@ async function handleCollectionGeneration() {
     if (!response.ok) throw new Error(result.error || `服务返回 ${response.status}`);
     state.activeBatchJobId = result.job_id;
     await chrome.storage.local.set({ activeBatchJobId: result.job_id });
+    await chrome.runtime.sendMessage({
+      type: "watch-background-job",
+      jobId: result.job_id,
+      title: `${video.title || state.video.title} · 整个合集`,
+      serverUrl
+    });
     elements.generateCollection.textContent = "停止后台任务";
     elements.batchStatus.textContent = `已加入 ${result.total} 个分 P${unavailable ? `，${unavailable} 个无字幕` : ""}`;
     startBatchPolling();
@@ -1054,6 +1064,56 @@ async function handleCollectionGeneration() {
 async function configuredServerUrl() {
   const { [SERVER_URL_KEY]: savedUrl = DEFAULT_SERVER_URL } = await chrome.storage.sync.get(SERVER_URL_KEY);
   return savedUrl.replace(/\/$/, "");
+}
+
+function currentSummarizeItem() {
+  return {
+    ...state.video,
+    segments: state.paragraphs.map((paragraph) => ({
+      start_ms: paragraph.start_ms,
+      duration_ms: paragraph.duration_ms,
+      text: paragraph.text
+    })),
+    output_language: elements.outputMode.value,
+    focus_excerpt: state.excerpts.map((item) => item.text).join("\n\n") || null
+  };
+}
+
+async function enqueueCurrentVideo() {
+  if (!state.video || !state.paragraphs.length) return;
+  const originalLabel = elements.saveBackground.textContent;
+  elements.saveBackground.disabled = true;
+  elements.saveBackground.textContent = "正在加入后台…";
+  try {
+    if (PREVIEW_MODE) {
+      elements.saveBackground.textContent = "已加入，完成后通知";
+      return;
+    }
+    const serverUrl = await configuredServerUrl();
+    const response = await fetch(`${serverUrl}/api/batches`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [currentSummarizeItem()] })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `服务返回 ${response.status}`);
+    await chrome.runtime.sendMessage({
+      type: "watch-background-job",
+      jobId: result.job_id,
+      title: state.video.title,
+      serverUrl
+    });
+    elements.saveBackground.textContent = "已加入，完成后通知";
+    elements.providerStatus.textContent = `${state.provider === "bilibili" ? "Bilibili" : "YouTube"} · 正在后台生成，可关闭侧栏`;
+  } catch (error) {
+    elements.saveBackground.textContent = "加入失败，重试";
+    elements.providerStatus.textContent = `无法加入后台：${error instanceof Error ? error.message : String(error)}`;
+  } finally {
+    setTimeout(() => {
+      elements.saveBackground.textContent = originalLabel;
+      elements.saveBackground.disabled = false;
+    }, 2200);
+  }
 }
 
 async function resumeBatchPolling() {
@@ -1198,6 +1258,7 @@ function resetTranscript(message) {
   elements.interviewMessages.replaceChildren();
   elements.interviewIntro.hidden = false;
   elements.generate.disabled = true;
+  elements.saveBackground.disabled = true;
   elements.copyTranscript.disabled = true;
   elements.copyNote.disabled = true;
   elements.openInterview.disabled = true;
@@ -1487,6 +1548,7 @@ function loadPreview() {
   renderVideoMeta();
   renderTranscript();
   elements.generate.disabled = false;
+  elements.saveBackground.disabled = false;
   elements.copyTranscript.disabled = false;
   elements.openInterview.disabled = false;
   updateInterviewSendState();

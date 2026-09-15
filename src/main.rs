@@ -22,15 +22,16 @@ use chrono::Local;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 use tower_http::cors::{AllowOrigin, CorsLayer};
 
 #[derive(Clone)]
 struct AppState {
     config: Config,
     client: Client,
-    batches: Arc<RwLock<HashMap<String, BatchStatus>>>,
+    batches: Arc<RwLock<HashMap<String, BatchJob>>>,
     batch_counter: Arc<AtomicU64>,
+    batch_persist_lock: Arc<Mutex<()>>,
 }
 
 #[derive(Clone)]
@@ -53,7 +54,7 @@ struct ResendConfig {
     to: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct SummarizeRequest {
     #[serde(default)]
     source: Option<SourcePlatform>,
@@ -156,7 +157,7 @@ struct InterviewResponse {
     answer: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct TranscriptSegment {
     start_ms: u64,
     #[serde(default)]
@@ -215,7 +216,7 @@ struct BatchCreated {
     total: usize,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct BatchStatus {
     job_id: String,
     state: String,
@@ -225,6 +226,27 @@ struct BatchStatus {
     failed: usize,
     current_title: Option<String>,
     errors: Vec<String>,
+    #[serde(default)]
+    archive_paths: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct BatchJob {
+    status: BatchStatus,
+    items: Vec<SummarizeRequest>,
+    next_index: usize,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct PersistedBatchState {
+    version: u8,
+    next_sequence: u64,
+    batches: HashMap<String, BatchJob>,
+}
+
+struct LoadedBatchState {
+    batches: HashMap<String, BatchJob>,
+    next_sequence: u64,
 }
 
 struct SavedArchive {
@@ -276,15 +298,18 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
     let config = Config::from_env()?;
     let cors = build_cors(&config.cors_origins)?;
+    let loaded = load_batch_state(&config.archive_dir).await;
     let state = Arc::new(AppState {
         config,
         client: Client::builder()
             .timeout(Duration::from_secs(120))
             .build()
             .context("failed to build HTTP client")?,
-        batches: Arc::new(RwLock::new(HashMap::new())),
-        batch_counter: Arc::new(AtomicU64::new(1)),
+        batches: Arc::new(RwLock::new(loaded.batches)),
+        batch_counter: Arc::new(AtomicU64::new(loaded.next_sequence.max(1))),
+        batch_persist_lock: Arc::new(Mutex::new(())),
     });
+    resume_batch_jobs(&state).await;
 
     let listener = tokio::net::TcpListener::bind(&state.config.bind_addr).await?;
     let app = Router::new()
@@ -480,67 +505,193 @@ async fn create_batch(
     let total = request.items.len();
     state.batches.write().await.insert(
         job_id.clone(),
-        BatchStatus {
-            job_id: job_id.clone(),
-            state: "queued".into(),
-            total,
-            completed: 0,
-            skipped: 0,
-            failed: 0,
-            current_title: None,
-            errors: Vec::new(),
+        BatchJob {
+            status: BatchStatus {
+                job_id: job_id.clone(),
+                state: "queued".into(),
+                total,
+                completed: 0,
+                skipped: 0,
+                failed: 0,
+                current_title: None,
+                errors: Vec::new(),
+                archive_paths: Vec::new(),
+            },
+            items: request.items,
+            next_index: 0,
         },
     );
+    persist_batch_state(&state)
+        .await
+        .map_err(ApiError::internal)?;
+    spawn_batch_job(Arc::clone(&state), job_id.clone());
 
-    let worker_state = Arc::clone(&state);
-    let worker_job_id = job_id.clone();
+    Ok(Json(BatchCreated { job_id, total }))
+}
+
+fn batch_state_path(archive_dir: &Path) -> PathBuf {
+    archive_dir.join(".open-transcript-jobs.json")
+}
+
+async fn load_batch_state(archive_dir: &Path) -> LoadedBatchState {
+    let path = batch_state_path(archive_dir);
+    let content = match tokio::fs::read(&path).await {
+        Ok(content) => content,
+        Err(error) if error.kind() == ErrorKind::NotFound => {
+            return LoadedBatchState {
+                batches: HashMap::new(),
+                next_sequence: 1,
+            }
+        }
+        Err(error) => {
+            eprintln!(
+                "unable to read background jobs from {}: {error}",
+                path.display()
+            );
+            return LoadedBatchState {
+                batches: HashMap::new(),
+                next_sequence: 1,
+            };
+        }
+    };
+    match serde_json::from_slice::<PersistedBatchState>(&content) {
+        Ok(mut persisted) if persisted.version == 1 => {
+            for job in persisted.batches.values_mut() {
+                if matches!(job.status.state.as_str(), "queued" | "running") {
+                    job.status.state = "queued".into();
+                    job.status.current_title = None;
+                }
+                job.next_index = job.next_index.min(job.items.len());
+            }
+            LoadedBatchState {
+                batches: persisted.batches,
+                next_sequence: persisted.next_sequence.max(1),
+            }
+        }
+        Ok(_) => {
+            eprintln!(
+                "ignoring unsupported background job state at {}",
+                path.display()
+            );
+            LoadedBatchState {
+                batches: HashMap::new(),
+                next_sequence: 1,
+            }
+        }
+        Err(error) => {
+            eprintln!(
+                "ignoring damaged background job state at {}: {error}",
+                path.display()
+            );
+            LoadedBatchState {
+                batches: HashMap::new(),
+                next_sequence: 1,
+            }
+        }
+    }
+}
+
+async fn persist_batch_state(state: &AppState) -> Result<()> {
+    let _persist_guard = state.batch_persist_lock.lock().await;
+    tokio::fs::create_dir_all(&state.config.archive_dir).await?;
+    let persisted = PersistedBatchState {
+        version: 1,
+        next_sequence: state.batch_counter.load(Ordering::Relaxed),
+        batches: state.batches.read().await.clone(),
+    };
+    let content = serde_json::to_vec_pretty(&persisted)?;
+    let path = batch_state_path(&state.config.archive_dir);
+    let temporary = path.with_extension("json.tmp");
+    tokio::fs::write(&temporary, content).await?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        tokio::fs::set_permissions(&temporary, std::fs::Permissions::from_mode(0o600)).await?;
+    }
+    tokio::fs::rename(&temporary, &path).await?;
+    Ok(())
+}
+
+async fn resume_batch_jobs(state: &Arc<AppState>) {
+    let job_ids = state
+        .batches
+        .read()
+        .await
+        .iter()
+        .filter(|(_, job)| matches!(job.status.state.as_str(), "queued" | "running"))
+        .map(|(job_id, _)| job_id.clone())
+        .collect::<Vec<_>>();
+    if !job_ids.is_empty() {
+        if let Err(error) = persist_batch_state(state).await {
+            eprintln!("unable to persist recovered background jobs: {error:#}");
+        }
+    }
+    for job_id in job_ids {
+        spawn_batch_job(Arc::clone(state), job_id);
+    }
+}
+
+fn spawn_batch_job(state: Arc<AppState>, job_id: String) {
     tokio::spawn(async move {
-        for item in request.items {
-            {
-                let mut batches = worker_state.batches.write().await;
-                let Some(status) = batches.get_mut(&worker_job_id) else {
+        loop {
+            let item = {
+                let mut batches = state.batches.write().await;
+                let Some(job) = batches.get_mut(&job_id) else {
                     return;
                 };
-                if status.state == "cancelled" {
-                    status.current_title = None;
-                    return;
+                if job.status.state == "cancelled" {
+                    job.status.current_title = None;
+                    None
+                } else if job.next_index >= job.items.len() {
+                    job.status.state = "completed".into();
+                    job.status.current_title = None;
+                    None
+                } else {
+                    let item = job.items[job.next_index].clone();
+                    job.status.state = "running".into();
+                    job.status.current_title = Some(item.title.clone());
+                    Some(item)
                 }
-                status.state = "running".into();
-                status.current_title = Some(item.title.clone());
+            };
+            if let Err(error) = persist_batch_state(&state).await {
+                eprintln!("unable to persist background job {job_id}: {error:#}");
             }
+            let Some(item) = item else {
+                return;
+            };
 
-            match summarize_request(&worker_state, item.clone()).await {
-                Ok(response) => {
-                    let mut batches = worker_state.batches.write().await;
-                    if let Some(status) = batches.get_mut(&worker_job_id) {
+            let result = summarize_request(&state, item.clone()).await;
+            {
+                let mut batches = state.batches.write().await;
+                let Some(job) = batches.get_mut(&job_id) else {
+                    return;
+                };
+                match result {
+                    Ok(response) => {
                         if response.archive_status == "existing" {
-                            status.skipped += 1;
+                            job.status.skipped += 1;
                         } else {
-                            status.completed += 1;
+                            job.status.completed += 1;
+                        }
+                        if !job.status.archive_paths.contains(&response.archive_path) {
+                            job.status.archive_paths.push(response.archive_path);
                         }
                     }
-                }
-                Err(error) => {
-                    let mut batches = worker_state.batches.write().await;
-                    if let Some(status) = batches.get_mut(&worker_job_id) {
-                        status.failed += 1;
-                        status
+                    Err(error) => {
+                        job.status.failed += 1;
+                        job.status
                             .errors
                             .push(format!("{}: {}", item.title, error.message));
                     }
                 }
+                job.next_index += 1;
+                job.status.current_title = None;
             }
-        }
-        let mut batches = worker_state.batches.write().await;
-        if let Some(status) = batches.get_mut(&worker_job_id) {
-            if status.state != "cancelled" {
-                status.state = "completed".into();
+            if let Err(error) = persist_batch_state(&state).await {
+                eprintln!("unable to persist background job {job_id}: {error:#}");
             }
-            status.current_title = None;
         }
     });
-
-    Ok(Json(BatchCreated { job_id, total }))
 }
 
 async fn get_batch(
@@ -552,7 +703,7 @@ async fn get_batch(
         .read()
         .await
         .get(&job_id)
-        .cloned()
+        .map(|job| job.status.clone())
         .map(Json)
         .ok_or_else(|| ApiError::not_found("batch job not found"))
 }
@@ -561,14 +712,21 @@ async fn cancel_batch(
     State(state): State<Arc<AppState>>,
     AxumPath(job_id): AxumPath<String>,
 ) -> Result<Json<BatchStatus>, ApiError> {
-    let mut batches = state.batches.write().await;
-    let status = batches
-        .get_mut(&job_id)
-        .ok_or_else(|| ApiError::not_found("batch job not found"))?;
-    if matches!(status.state.as_str(), "queued" | "running") {
-        status.state = "cancelled".into();
-    }
-    Ok(Json(status.clone()))
+    let status = {
+        let mut batches = state.batches.write().await;
+        let job = batches
+            .get_mut(&job_id)
+            .ok_or_else(|| ApiError::not_found("batch job not found"))?;
+        if matches!(job.status.state.as_str(), "queued" | "running") {
+            job.status.state = "cancelled".into();
+            job.status.current_title = None;
+        }
+        job.status.clone()
+    };
+    persist_batch_state(&state)
+        .await
+        .map_err(ApiError::internal)?;
+    Ok(Json(status))
 }
 
 async fn interview(
@@ -1584,6 +1742,58 @@ mod tests {
                 .unwrap(),
             Some(existing)
         );
+    }
+
+    #[tokio::test]
+    async fn loads_persisted_jobs_and_requeues_interrupted_work() {
+        let directory = tempfile::tempdir().unwrap();
+        let job_id = "saved-job".to_owned();
+        let persisted = PersistedBatchState {
+            version: 1,
+            next_sequence: 9,
+            batches: HashMap::from([(
+                job_id.clone(),
+                BatchJob {
+                    status: BatchStatus {
+                        job_id: job_id.clone(),
+                        state: "running".into(),
+                        total: 1,
+                        completed: 0,
+                        skipped: 0,
+                        failed: 0,
+                        current_title: Some("A video".into()),
+                        errors: Vec::new(),
+                        archive_paths: Vec::new(),
+                    },
+                    items: vec![request(Some("dQw4w9WgXcQ"), vec![], Some("caption"))],
+                    next_index: 0,
+                },
+            )]),
+        };
+        tokio::fs::write(
+            batch_state_path(directory.path()),
+            serde_json::to_vec(&persisted).unwrap(),
+        )
+        .await
+        .unwrap();
+
+        let loaded = load_batch_state(directory.path()).await;
+        let job = loaded.batches.get(&job_id).unwrap();
+        assert_eq!(loaded.next_sequence, 9);
+        assert_eq!(job.status.state, "queued");
+        assert_eq!(job.status.current_title, None);
+        assert_eq!(job.items.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn damaged_job_state_does_not_prevent_startup() {
+        let directory = tempfile::tempdir().unwrap();
+        tokio::fs::write(batch_state_path(directory.path()), b"not json")
+            .await
+            .unwrap();
+        let loaded = load_batch_state(directory.path()).await;
+        assert!(loaded.batches.is_empty());
+        assert_eq!(loaded.next_sequence, 1);
     }
 
     #[tokio::test]

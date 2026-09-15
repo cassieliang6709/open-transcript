@@ -5,6 +5,15 @@ All notable changes to OpenTranscript are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and releases use [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-09-15
+
+### Added
+
+- One-click background saving for the current YouTube video or Bilibili part.
+- Durable local job state with automatic recovery after service restarts.
+- Chrome completion notifications with an “Open in Obsidian” action.
+- Saved archive paths in batch status responses for local integrations.
+
 ## [0.1.0] - 2026-09-15
 
 ### Added
@@ -31,4 +40,5 @@ and releases use [Semantic Versioning](https://semver.org/).
 - API credentials stay in a local, permission-restricted `.env` file. Release
   assets, examples, and the Chrome extension contain no real keys.
 
+[0.2.0]: https://github.com/cassieliang6709/open-transcript/releases/tag/v0.2.0
 [0.1.0]: https://github.com/cassieliang6709/open-transcript/releases/tag/v0.1.0

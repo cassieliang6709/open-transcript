@@ -6,7 +6,7 @@ IFS=$'\n\t'
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd -- "$script_dir/.." && pwd)"
 output_dir="${OPENTRANSCRIPT_OUTPUT_DIR:-$project_dir/dist}"
-version="${OPENTRANSCRIPT_VERSION:-0.1.0}"
+version="${OPENTRANSCRIPT_VERSION:-0.2.0}"
 backend_binary="${OPENTRANSCRIPT_BACKEND_BINARY:-$project_dir/target/release/open-transcript}"
 skip_build="${OPENTRANSCRIPT_SKIP_BACKEND_BUILD:-0}"
 
@@ -19,7 +19,7 @@ Build a reproducible macOS backend asset:
   dist/open-transcript-macos-ARCH-vVERSION.tar.gz.sha256
 
 Options:
-  --version VERSION       Asset version (default: 0.1.0)
+  --version VERSION       Asset version (default: 0.2.0)
   --output-dir DIRECTORY  Release output directory (default: ./dist)
   --binary PATH           Use an existing open-transcript binary
   --skip-build            Do not run cargo build --release

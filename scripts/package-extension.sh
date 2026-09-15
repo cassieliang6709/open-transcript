@@ -7,7 +7,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd -- "$script_dir/.." && pwd)"
 extension_dir="$project_dir/extension"
 output_dir="${OPENTRANSCRIPT_OUTPUT_DIR:-$project_dir/dist}"
-version="${OPENTRANSCRIPT_VERSION:-0.1.0}"
+version="${OPENTRANSCRIPT_VERSION:-0.2.0}"
 
 usage() {
     cat <<'EOF'
@@ -18,7 +18,7 @@ Create a reproducible Chrome extension archive:
   dist/open-transcript-chrome-vVERSION.zip.sha256
 
 Options:
-  --version VERSION       Asset version (default: 0.1.0)
+  --version VERSION       Asset version (default: 0.2.0)
   --output-dir DIRECTORY  Release output directory (default: ./dist)
   -h, --help              Show this help
 

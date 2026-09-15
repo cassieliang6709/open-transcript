@@ -4,7 +4,7 @@
 
 在视频旁阅读带时间戳的字幕，留下值得保存的片段，依据字幕追问，并把一个视频或整个 B 站合集整理成自己拥有的 Markdown 笔记。
 
-[English](README.md) · [下载 v0.1.0](https://github.com/cassieliang6709/open-transcript/releases/latest) · [更新记录](CHANGELOG.md)
+[English](README.md) · [下载 v0.2.0](https://github.com/cassieliang6709/open-transcript/releases/latest) · [更新记录](CHANGELOG.md)
 
 ![OpenTranscript：阅读字幕、加入摘录、生成带时间线引用的 AI 笔记、后台处理合集](docs/assets/open-transcript-demo.gif)
 
@@ -16,12 +16,13 @@
 - 选中文字后复制、编辑或加入重点摘录。
 - 对当前字幕进行 AI 访谈，生成中文、英文或逐段双语笔记。
 - 总结中的关键观点带可点击的时间线引用，点击即可定位播放器。
+- 点击“稍后在 Obsidian 看”后即可关闭侧栏；任务落盘保存，服务重启后继续，完成时通过 Chrome 通知打开笔记。
 - Bilibili 多 P 视频可以留在本地服务中逐集处理，关闭侧栏后仍会继续。
 - 笔记写入本机 Markdown 文件；API Key 只保存在本地服务配置中。
 
 ## 三步安装
 
-v0.1.0 支持 Apple Silicon Mac 与 Chrome 系浏览器。
+v0.2.0 支持 Apple Silicon Mac 与 Chrome 系浏览器。
 
 ### 1. 安装本地服务
 
@@ -39,7 +40,7 @@ launchctl kickstart -k "gui/$(id -u)/com.opentranscript.server"
 
 ### 2. 加载 Chrome 扩展
 
-下载并解压 [`open-transcript-chrome-v0.1.0.zip`](https://github.com/cassieliang6709/open-transcript/releases/download/v0.1.0/open-transcript-chrome-v0.1.0.zip)。打开 `chrome://extensions`，启用**开发者模式**，点击**加载已解压的扩展程序**，选择解压后的文件夹。
+下载并解压 [`open-transcript-chrome-v0.2.0.zip`](https://github.com/cassieliang6709/open-transcript/releases/download/v0.2.0/open-transcript-chrome-v0.2.0.zip)。打开 `chrome://extensions`，启用**开发者模式**，点击**加载已解压的扩展程序**，选择解压后的文件夹。
 
 ### 3. 打开视频
 
@@ -73,6 +74,7 @@ LLM_API_KEY=your-key-here
 | 字幕 | 搜索、播放定位、跟随播放、段落编辑、复制全文 |
 | AI 笔记 | 摘要与长文；支持中文、英文和沉浸式双语 |
 | 时间线引用 | 总结关键观点引用 `[MM:SS]`，侧栏与导出的 Markdown 都可跳回原片 |
+| 视频收件箱 | 当前视频一键入队；任务重启恢复；完成通知可直接在 Obsidian 打开 |
 | 后台合集 | 最多 100 个 B 站分 P；顺序处理、跳过已有、单项失败继续、可取消 |
 | 本地存储 | 按来源和语言去重的 Markdown 文件 |
 | 模型 | Ollama 原生接口或 OpenAI-compatible Chat Completions 接口 |

@@ -4,7 +4,7 @@
 
 Read a timestamped transcript beside the video, keep the passages that matter, ask questions grounded in the captions, and turn one video—or an entire Bilibili collection—into Markdown notes you own.
 
-[中文说明](README.zh-CN.md) · [Download v0.1.0](https://github.com/cassieliang6709/open-transcript/releases/latest) · [Changelog](CHANGELOG.md)
+[中文说明](README.zh-CN.md) · [Download v0.2.0](https://github.com/cassieliang6709/open-transcript/releases/latest) · [Changelog](CHANGELOG.md)
 
 ![OpenTranscript: read captions, save an excerpt, generate an AI note, and process a collection in the background](docs/assets/open-transcript-demo.gif)
 
@@ -15,12 +15,13 @@ Read a timestamped transcript beside the video, keep the passages that matter, a
 - **Read beside the video.** Search every caption, follow playback, and jump to the source from a timestamp.
 - **Keep the useful parts.** Select text to copy, edit, or add it as a priority excerpt for the note.
 - **Ask and write.** Chat against the current transcript, then create Chinese, English, or line-by-line bilingual notes with clickable timeline citations.
-- **Leave a collection running.** Bilibili multi-part videos continue sequentially in the local service after the panel closes.
+- **Save now, read later.** Send the current video to a persistent background queue, close the panel, and open the finished note from the Chrome notification.
+- **Leave a collection running.** Bilibili multi-part videos continue sequentially in the local service after the panel closes or the service restarts.
 - **Own the result.** Notes are Markdown files on your Mac. API credentials stay in the local service and never enter the extension.
 
 ## Install in three steps
 
-OpenTranscript v0.1.0 supports Apple Silicon Macs and Chrome-compatible browsers.
+OpenTranscript v0.2.0 supports Apple Silicon Macs and Chrome-compatible browsers.
 
 ### 1. Install the local service
 
@@ -38,7 +39,7 @@ launchctl kickstart -k "gui/$(id -u)/com.opentranscript.server"
 
 ### 2. Load the Chrome extension
 
-Download [`open-transcript-chrome-v0.1.0.zip`](https://github.com/cassieliang6709/open-transcript/releases/download/v0.1.0/open-transcript-chrome-v0.1.0.zip) and unzip it. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the unzipped folder.
+Download [`open-transcript-chrome-v0.2.0.zip`](https://github.com/cassieliang6709/open-transcript/releases/download/v0.2.0/open-transcript-chrome-v0.2.0.zip) and unzip it. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the unzipped folder.
 
 ### 3. Open a video
 
@@ -72,6 +73,7 @@ Never put an API key in the extension directory or commit it to Git.
 | Transcript | Search, timestamp seek, playback following, inline paragraph edits, full copy |
 | Notes | Summary and long article in Chinese, English, or immersive bilingual format |
 | Grounding | Key claims cite clickable timestamps that seek the source video; selected excerpts influence the note |
+| Background inbox | One-click current-video jobs persist across service restarts and notify you when the Obsidian note is ready |
 | Batch | Up to 100 Bilibili parts, sequential processing, skip existing, continue on item failure, cancel between items |
 | Storage | Idempotent, source-aware Markdown files in a local directory such as `~/Documents/OpenTranscript` |
 | Providers | Ollama native API or an OpenAI-compatible chat-completions endpoint |

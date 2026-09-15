@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "OpenTranscript",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Read, excerpt, ask, and turn YouTube or Bilibili transcripts into local notes.",
-  "permissions": ["activeTab", "scripting", "storage", "notifications", "sidePanel", "clipboardWrite"],
+  "permissions": ["activeTab", "scripting", "storage", "notifications", "sidePanel", "clipboardWrite", "alarms"],
   "host_permissions": [
     "https://www.youtube.com/*",
     "https://bilibili.com/*",

@@ -74,6 +74,29 @@ button {
   color: #ddd8ff;
 }
 
+.background-save-button {
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid rgba(139, 124, 246, 0.48);
+  border-radius: 7px;
+  padding: 9px 12px;
+  background: var(--violet-soft);
+  color: #d9d4ff;
+  font-weight: 620;
+  cursor: pointer;
+}
+
+.background-save-button:hover,
+.background-save-button:focus-visible {
+  border-color: var(--violet);
+  background: rgba(139, 124, 246, 0.2);
+}
+
+.background-save-button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
 .studio {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
