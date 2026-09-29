@@ -1,0 +1,30 @@
+name: Feature request / 功能建议
+description: Suggest an improvement to OpenTranscript / 建议改进 OpenTranscript
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: Search existing issues first. Remove API keys, cookies, private transcripts, and personal paths. English or Chinese is welcome. / 请先搜索已有 issue，并删除密钥、Cookie、私人转录和个人路径。中英文均可。
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem / 用户问题
+      description: What problem or limitation are you trying to solve? / 你希望解决什么问题或限制？
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Proposed behavior / 建议行为
+      description: What should OpenTranscript do? / 你希望 OpenTranscript 如何工作？
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source platform / 来源平台
+      options: [YouTube, Bilibili, Local service, Other / 其他]
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered / 考虑过的替代方案
+      description: How do you handle this today? / 你目前如何处理？
