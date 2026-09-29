@@ -108,6 +108,18 @@ cargo run --release
 - 本地视频与笔记资料库
 - 签名安装包与 Chrome Web Store 发布
 
+## 参与贡献
+
+**欢迎一起做 OpenTranscript，也欢迎你的第一个开源 PR！** 文档、测试、问题反馈、翻译和小功能改进都需要帮助，不会 Rust 也能参与。中英文交流都可以。
+
+- [入门任务：补充安装排障指南](https://github.com/cassieliang6709/open-transcript/issues/1) — 适合从文档开始。
+- [入门任务：补充 B 站字幕语言选择测试](https://github.com/cassieliang6709/open-transcript/issues/2) — JavaScript，无需真实账号或 API Key。
+- [让扩展设置页支持中英文](https://github.com/cassieliang6709/open-transcript/issues/3) — 范围明确的扩展界面任务。
+
+也可以浏览 [good first issue](https://github.com/cassieliang6709/open-transcript/labels/good%20first%20issue) 和 [help wanted](https://github.com/cassieliang6709/open-transcript/labels/help%20wanted)。先查看 issue 当前状态和留言，再留言认领并简单说明计划，避免重复劳动。较大的想法请先开 issue 讨论范围。
+
+提交前请阅读 [贡献指南](CONTRIBUTING.md)，里面列出了检查命令和 PR 要求。报告问题、帮忙试用同样是贡献：请提供来源站点、浏览器及系统版本、复现步骤和脱敏后的错误信息，不要公开 API Key、Cookie 或私人字幕内容。
+
 ## License
 
 [MIT](LICENSE)

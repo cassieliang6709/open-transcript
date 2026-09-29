@@ -117,6 +117,18 @@ For a remote service, set an exact `CORS_ALLOWED_ORIGINS=chrome-extension://YOUR
 
 Issues and focused pull requests are welcome. Please include the source site, browser version, and a redacted error message when reporting subtitle failures.
 
+## Contribute
+
+**Contributors wanted — including your first open-source PR!** Help with documentation, tests, bug reports, translation, or focused improvements. You do not need to know Rust to get started. English and Chinese are both welcome.
+
+- [First issue: improve the installation troubleshooting guide](https://github.com/cassieliang6709/open-transcript/issues/1) — documentation.
+- [First issue: test Bilibili subtitle language selection](https://github.com/cassieliang6709/open-transcript/issues/2) — JavaScript, no live account or API key needed.
+- [Add English/Chinese support to the options page](https://github.com/cassieliang6709/open-transcript/issues/3) — a focused extension UI task.
+
+Browse [good first issues](https://github.com/cassieliang6709/open-transcript/labels/good%20first%20issue) or [help wanted](https://github.com/cassieliang6709/open-transcript/labels/help%20wanted). Check the current issue status and comments, then leave a short plan before starting so we can avoid duplicate work. For larger ideas, open an issue to agree on scope first.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for checks and PR expectations. Bug reports and testing feedback also count: include the source site, browser/OS version, reproduction steps, and a redacted error message. Never post API keys, browser cookies, or private transcripts.
+
 ## License
 
 [MIT](LICENSE)
