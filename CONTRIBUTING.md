@@ -11,3 +11,5 @@ node --test extension/bilibili-utils.test.js
 ```
 
 Changes to a provider should cover success, authentication failure, missing captions, malformed responses, and URL identity. Changes to the side panel should be checked at a 420 px panel width on both YouTube and Bilibili.
+
+Before a release, record the results of the [manual smoke test](docs/manual-testing.md).
