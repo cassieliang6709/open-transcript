@@ -100,6 +100,8 @@ cargo run --release
 
 健康检查：`curl http://127.0.0.1:4242/health`。
 
+安装或连接失败时，请参阅[排障指南](docs/troubleshooting.md)。
+
 ## 路线图
 
 以下是规划中的功能，并非当前已支持。每个 issue 都列出了范围和验收要求；较大的功能请先讨论第一阶段方案再实现。
