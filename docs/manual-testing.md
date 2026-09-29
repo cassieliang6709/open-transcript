@@ -26,7 +26,8 @@ cookies, API keys, and transcript content from recorded results.
 | Select a search result | Playback seeks to its timestamp | |
 | Enable follow playback | The current caption remains visible | |
 | Create an excerpt | The chosen text and timestamp are preserved | |
-| Generate a note | The background job completes successfully | |
+| Generate a note with **生成笔记** | Foreground generation completes and displays the note | |
+| Queue a note with **稍后在 Obsidian 看** | The background job is accepted and completes successfully | |
 | Inspect citations | Each timestamp seeks to the referenced moment | |
 | Resize side panel to 420 px | Controls and transcript remain usable | |
 
@@ -36,8 +37,8 @@ cookies, API keys, and transcript content from recorded results.
 | --- | --- | --- |
 | Video has no usable captions | A caption-specific error appears; no model request starts | |
 | Local service is unavailable | A connection error and retry path are visible | |
-| Close panel during generation | Work continues in the background | |
-| Restart after an unfinished job | The job is recovered or its terminal state is explained | |
+| Close panel during generation | Queue with **稍后在 Obsidian 看**, confirm acceptance, close the panel, then receive a completion notification and find the saved note | |
+| Restart after an unfinished job | With a controlled valid input/provider, restart the local service while a background job is unfinished; the job resumes and completes. Record any unexpected terminal failure as FAIL with diagnostics | |
 
 Do not mark an unperformed scenario as passing. Attach only redacted output to a
 release or pull request and record follow-up issues for every failure.
