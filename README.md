@@ -101,6 +101,8 @@ Load `extension/` from `chrome://extensions` for development. Build release arti
 
 The health check is `curl http://127.0.0.1:4242/health`.
 
+If installation or connection fails, see [Troubleshooting](docs/troubleshooting.md).
+
 ## Privacy and architecture
 
 The extension reads the active video's metadata and available subtitle track. It sends transcript text to the local Rust service. The service writes Markdown locally and contacts only the model endpoint you configure, plus optional Resend email when all Resend settings are present. Bilibili requests reuse the active browser session without copying cookie values into project files.
