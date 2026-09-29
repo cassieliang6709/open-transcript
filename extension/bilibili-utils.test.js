@@ -4,7 +4,8 @@ const {
   isBilibiliVideoUrl,
   normaliseBilibiliSubtitleBody,
   parseBilibiliUrl,
-  preferredBilibiliSubtitle
+  preferredBilibiliSubtitle,
+  subtitleLanguage
 } = require("./bilibili-utils.js");
 
 const context = parseBilibiliUrl("https://www.bilibili.com/video/BV1RFTc62EaK/?p=2");
@@ -26,6 +27,25 @@ assert.equal(preferredBilibiliSubtitle([en, aiZh, zh]), zh);
 assert.equal(preferredBilibiliSubtitle([en, aiZh]), aiZh);
 assert.equal(preferredBilibiliSubtitle([en]), en);
 assert.equal(preferredBilibiliSubtitle([{ lan: "ja" }, en]), en);
+assert.equal(preferredBilibiliSubtitle(null), null);
+assert.equal(preferredBilibiliSubtitle({}), null);
+assert.equal(preferredBilibiliSubtitle([null, undefined]), null);
+
+const langChinese = { lang: "zh-TW" };
+const codeEnglish = { languageCode: "en-GB" };
+const namedChinese = { label: "简体中文" };
+const namedEnglish = { name: "英语" };
+assert.equal(subtitleLanguage(langChinese), "zh");
+assert.equal(subtitleLanguage(codeEnglish), "en");
+assert.equal(subtitleLanguage(namedChinese), "zh");
+assert.equal(subtitleLanguage(namedEnglish), "en");
+assert.equal(subtitleLanguage(null), "");
+
+const first = { lan: "ja", subtitle_url: "ja" };
+assert.equal(preferredBilibiliSubtitle([first, codeEnglish, aiZh, langChinese]), langChinese);
+assert.equal(preferredBilibiliSubtitle([first, codeEnglish, aiZh]), aiZh);
+assert.equal(preferredBilibiliSubtitle([first, codeEnglish]), codeEnglish);
+assert.equal(preferredBilibiliSubtitle([first]), first);
 
 assert.deepEqual(normaliseBilibiliSubtitleBody([
   { from: 1.25, to: 2.5, content: " 你好\n世界 " },
