@@ -6,7 +6,7 @@ Never paste API keys, cookies, or private transcripts into diagnostics or issue 
 
 **Symptom:** **测试连接** fails or requests report a network error.  
 **Diagnose:** run `curl http://127.0.0.1:4242/health` and
-`launchctl print gui/$(id -u)/com.opentranscript.service`. The macOS installer
+`launchctl print gui/$(id -u)/com.opentranscript.server`. The macOS installer
 uses `~/.local/share/open-transcript/bin/open-transcript`, configuration at
 `~/.config/open-transcript/.env`, and logs under `~/Library/Logs/OpenTranscript`.  
 **Recover:** rerun the installer or load its LaunchAgent, then keep the extension
@@ -19,7 +19,7 @@ authentication, endpoint, or model error.
 **Diagnose:** compare `~/.config/open-transcript/.env` with `.env.example`; check
 that the selected provider has an endpoint and model, without printing its key.  
 **Recover:** correct the configuration and restart with
-`launchctl kickstart -k gui/$(id -u)/com.opentranscript.service`.
+`launchctl kickstart -k gui/$(id -u)/com.opentranscript.server`.
 
 ## Browser origin permission is denied
 
