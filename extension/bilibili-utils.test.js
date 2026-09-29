@@ -18,6 +18,12 @@ assert.equal(parseBilibiliUrl("https://www.bilibili.com/video/BV1RFTc62EaK/").pa
 assert.equal(parseBilibiliUrl("https://www.bilibili.com/video/BV1RFTc62EaK/?p=bad").part, 1);
 assert.equal(isBilibiliVideoUrl("https://www.bilibili.com/video/BV1RFTc62EaK/?p=2"), true);
 assert.equal(isBilibiliVideoUrl("https://www.bilibili.com/space/1"), false);
+assert.equal(parseBilibiliUrl("not a url"), null);
+assert.equal(parseBilibiliUrl("https://www.bilibili.com.evil.test/video/BV1RFTc62EaK"), null);
+assert.equal(parseBilibiliUrl("https://bilibili.com/video/BVshort"), null);
+assert.equal(parseBilibiliUrl("https://bilibili.com/video/BV1RFTc62EaK?p=0").part, 1);
+assert.equal(parseBilibiliUrl("https://bilibili.com/video/BV1RFTc62EaK?p=-2").part, 1);
+assert.equal(parseBilibiliUrl("https://bilibili.com/video/BV1RFTc62EaK").part, 1);
 
 const zh = { lan: "zh-CN", subtitle_url: "zh" };
 const aiZh = { lan: "ai-zh", subtitle_url: "ai" };
@@ -35,4 +41,12 @@ assert.deepEqual(normaliseBilibiliSubtitleBody([
 assert.equal(
   bilibiliTimestampUrl("https://www.bilibili.com/video/BV1RFTc62EaK/?p=2", 634000),
   "https://www.bilibili.com/video/BV1RFTc62EaK/?p=2&t=634"
+);
+assert.equal(
+  bilibiliTimestampUrl("https://www.bilibili.com/video/BV1RFTc62EaK?p=3&t=1&ref=test", 2500),
+  "https://www.bilibili.com/video/BV1RFTc62EaK?p=3&t=2&ref=test"
+);
+assert.equal(
+  bilibiliTimestampUrl("https://www.bilibili.com/video/BV1RFTc62EaK?p=2", -1000),
+  "https://www.bilibili.com/video/BV1RFTc62EaK?p=2&t=0"
 );
