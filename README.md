@@ -109,13 +109,16 @@ For a remote service, set an exact `CORS_ALLOWED_ORIGINS=chrome-extension://YOUR
 
 ## Roadmap
 
-- Speech-to-text fallback for videos without captions
-- YouTube playlist background processing
-- Provider setup inside the extension
-- Persistent local video and note library
-- Signed installers and Chrome Web Store distribution
+These are planned features, not current capabilities. Each issue lists scope and acceptance criteria. For larger features, propose a first milestone before implementation.
 
-Issues and focused pull requests are welcome. Please include the source site, browser version, and a redacted error message when reporting subtitle failures.
+- [Opt-in local speech-to-text fallback for videos without captions](https://github.com/cassieliang6709/open-transcript/issues/4)
+- [Process youtube playlists through the persistent background queue](https://github.com/cassieliang6709/open-transcript/issues/5)
+- [Configure model providers from the extension](https://github.com/cassieliang6709/open-transcript/issues/6)
+- [Browse a persistent local video and note library](https://github.com/cassieliang6709/open-transcript/issues/7)
+- [Prepare signed and notarized macos distribution](https://github.com/cassieliang6709/open-transcript/issues/8)
+- [Prepare chrome web store submission](https://github.com/cassieliang6709/open-transcript/issues/9)
+
+More starter tasks: [feature request template](https://github.com/cassieliang6709/open-transcript/issues/10), [Bilibili URL tests](https://github.com/cassieliang6709/open-transcript/issues/11), and [manual release checklist](https://github.com/cassieliang6709/open-transcript/issues/12).
 
 ## Contribute
 

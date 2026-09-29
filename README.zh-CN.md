@@ -102,11 +102,16 @@ cargo run --release
 
 ## 路线图
 
-- 无字幕视频的语音识别兜底
-- YouTube 播放列表后台处理
-- 扩展内模型配置
-- 本地视频与笔记资料库
-- 签名安装包与 Chrome Web Store 发布
+以下是规划中的功能，并非当前已支持。每个 issue 都列出了范围和验收要求；较大的功能请先讨论第一阶段方案再实现。
+
+- [无字幕视频的本地语音识别兜底](https://github.com/cassieliang6709/open-transcript/issues/4)
+- [YouTube 播放列表后台处理](https://github.com/cassieliang6709/open-transcript/issues/5)
+- [在扩展内配置模型服务](https://github.com/cassieliang6709/open-transcript/issues/6)
+- [本地视频与笔记资料库](https://github.com/cassieliang6709/open-transcript/issues/7)
+- [macOS 签名与公证发布](https://github.com/cassieliang6709/open-transcript/issues/8)
+- [准备 Chrome Web Store 上架](https://github.com/cassieliang6709/open-transcript/issues/9)
+
+更多入门任务：[功能建议模板](https://github.com/cassieliang6709/open-transcript/issues/10)、[B 站 URL 边界测试](https://github.com/cassieliang6709/open-transcript/issues/11)、[发布前手动验收清单](https://github.com/cassieliang6709/open-transcript/issues/12)。
 
 ## 参与贡献
 
